@@ -13,14 +13,6 @@ class BaseScanner(object):
     # 스니핑 소켓 생성
     # @arg: socket - interface 가 있는 config
     def _create_socket(self):
-        # 설정파일 확인
-        if not 'socket' in self.config:
-            logging.critical('설정 파일에 socket 세션이 필요합니다.')
-            sys.exit(0)
-        if not 'interface' in self.config['socket']:
-            logging.critical('설정 파일 socket 세션에'
-                             + 'interface 항목이 필요합니다.')
-            sys.exit(0)
         # 소켓 생성시 예외 발생 가능
         try:
             # 소켓 생성
@@ -39,14 +31,6 @@ class BaseScanner(object):
     # 맥 주소 파싱
     # @arg: 스니핑 소켓
     def _get_readed_mac(self):
-        # 설정파일 확인
-        if not 'socket' in self.config:
-            logging.critical('설정 파일에 socket 세션이 필요합니다.')
-            sys.exit(0)
-        if not 'timeout' in self.config['socket']:
-            logging.critical('설정 파일 socket 세션에'
-                             + 'timeout 항목이 필요합니다.')
-            sys.exit(0)
         # 읽을 데이터가 없을 떄를 위해 타임 아웃 설정
         timeout = int(self.config['socket']['timeout'])
         self.read_socket.settimeout(timeout)
@@ -99,8 +83,6 @@ class BaseScanner(object):
 
     # 스캔 시작
     def start_scan(self):
-        # 로깅 설정
-        self._set_logging()
         # 소켓 생성
         self._create_socket()
         # 종료를 위한 try-catch
@@ -118,9 +100,22 @@ class BaseScanner(object):
             logging.info('모니터링을 중지합니다.')
             sys.exit(0)
 
-    # 로깅 설정
-    def _set_logging(self):
+    # 초기화: 설정 파일 불러오기
+    # 베이스 스캐너는 상속자마다 설정 파일이 다를 수 있기 때문에
+    # 설정 파일을 인자로 받음
+    def __init__(self, config_file):
+        # dict 타입 config_file 고려 for unit testing
+        if type(config_file) == dict:
+            self.config = config_file
         # 설정 파일 확인
+        if not os.path.exists(config_file):
+            logging.critical('Config file does not exists: {0}'.format(
+                             config_file))
+            sys.exit(0)
+        # 설정파일 읽기
+        self.config = configparser.ConfigParser()
+        self.config.read(config_file)
+        # 로그 설정 파일 확인
         if not 'log' in self.config:
             logging.critical('설정 파일에 log 세션이 필요합니다.')
             sys.exit(0)
@@ -139,22 +134,18 @@ class BaseScanner(object):
         logging.basicConfig(filename = log_file,
                             level = log_level,
                             format = '%(asctime)s '
-                                   + '%(levelname)s:'
+                                   + '%(levelname)s: '
                                    + '%(message)s',
                             datefmt = '%Y.%m.%d %H:%M:%S')
-            
-    # 초기화: 설정 파일 불러오기
-    def __init__(self, config_file):
-        # dict 타입 config_file 고려 for unit testing
-        if type(config_file) == dict:
-            self.config = config_file
-            return
-        # 설정 파일 확인
-        if not os.path.exists(config_file):
-            logging.critical('Config file does not exists: {0}'.format(
-                             config_file))
+        # 소켓 설정 파일 확인
+        if not 'socket' in self.config:
+            logging.critical('설정 파일에 socket 세션이 필요합니다.')
             sys.exit(0)
-        # 설정파일 읽기
-        self.config = configparser.ConfigParser()
-        self.config.read(config_file)
-        
+        if not 'interface' in self.config['socket']:
+            logging.critical('설정 파일 socket 세션에'
+                             + 'interface 항목이 필요합니다.')
+            sys.exit(0)
+        if not 'timeout' in self.config['socket']:
+            logging.critical('설정 파일 socket 세션에'
+                             + 'timeout 항목이 필요합니다.')
+            sys.exit(0)

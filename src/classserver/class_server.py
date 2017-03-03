@@ -12,7 +12,20 @@ from http.server import CGIHTTPRequestHandler
 import time
 
 
+INIFILE = 'class_server.ini'
+
+
 class ClassScannerServerHandler(CGIHTTPRequestHandler):
+    # 초기화
+    # 데이터베이스 이름 확인
+    config_file = INIFILE
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    scan_db = config['handle']['scan_db']
+    # 데이터베이스 연결
+    connector = sqlite3.connect(scan_db)
+    cursor = connector.cursor()
+        
     # POST
     def do_POST(self):
         # 홈페이지
@@ -33,7 +46,7 @@ class ClassScannerServerHandler(CGIHTTPRequestHandler):
             log_set = data['log_set'][0]
             # 데이터베이스 커밋
             self.cursor.execute('''
-                    INSERT OR IGNORE INTO classscan
+                    INSERT OR IGNORE INTO scan
                     (unix_time, device_id, log_set) VALUES ('''
                     + str(unix_time) + ', '
                     + '"' + device_id + '", '
@@ -58,7 +71,7 @@ def main():
     """HTTP 서버 데몬 생성
     """
     # ini 파일 위치 확인
-    config_file = 'class_server.ini'
+    config_file = INIFILE
     config = configparser.ConfigParser()
     config.read(config_file)
     # ini 서버 옵션
