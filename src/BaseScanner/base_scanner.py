@@ -7,7 +7,7 @@ import sys # exit
 import struct # unstruct
 import logging # log
 
-class MACScanner(object):
+class BaseScanner(object):
     """MAC 주소를 스캔하는 클래스
     """
     # 스니핑 소켓 생성
