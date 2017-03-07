@@ -26,7 +26,7 @@ def _fail_response(user_id):
     print("</html>")
 
 
-def _success_response(log_set):
+def _success_response(user_id, log_set):
     """불러오기 성공 응답
     """
     print("<html>")
@@ -35,15 +35,15 @@ def _success_response(log_set):
     print("</head>")
     print("<body>")
     print("  <h1>정보 확인 성공</h1>")
-    print("  <h2>안녕하세요. {0} ({1})</h2>".format(user_id, mac))
+    print("  <h2>안녕하세요. {0}</h2>".format(user_id))
     print("  <p>")
     print("    시간 장소<br>")
     for log in log_set:
         log_time = log[0]
-        log_identifier = log[1]
+        device_id = log[1]
         strtime = time.strftime('%Y.%m.%d %H:%M:%S',
                                 time.localtime(log_time))
-        print("    {0} {1}<br>".format(strtime, log_identifier))
+        print("    {0} {1}<br>".format(strtime, device_id))
     print("  </p>")
     print("  <a href='/index.html'> Return to mainpage </a>")
     print("</body>")
@@ -92,4 +92,4 @@ log_set = cursor.fetchall()
 # 유저 기록이 없을 경우
 if log_set == None:
     log_set = [(int(time.time()), '기록없음')]
-_success_response(log_set)
+_success_response(user_id, log_set)

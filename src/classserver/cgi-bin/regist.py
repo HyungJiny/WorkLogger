@@ -20,6 +20,7 @@ def _fail_response(user_id, user_mac):
     print("  <h1>MAC주소 등록에 실패했습니다.</h1>")
     print("  <h1>개발자에게 알려주세요.</h1>")
     print("  <h2>입력된 정보: {0} {1}</h2>".format(user_id, user_mac))
+    print("  <h3>가능한 사유: 이미 등록된 MAC 주소</h3>")
     print("  <a href='/index.html'>메인페이지로 가기</a>")
     print("</body>")
     print("</html>")
@@ -67,6 +68,18 @@ user_db = config['server']['user_db']
 # 데이터베이스 연결
 connector = sqlite3.connect(user_db)
 cursor = connector.cursor()
+# 중복 MAC 주소 확인
+try:
+    cursor.execute('SELECT * FROM user '
+                       + 'WHERE mac="' + hashed_mac + '" ')
+    registed_mac = cursor.fetchone()
+    if registed_mac != None:
+        _fail_response(user_id, user_mac)
+        sys.exit(0)
+except Exception as err:
+    _fail_response(user_id, user_mac)
+    print(err)
+# 데이터베이스에 저장
 try:
     cursor.executescript('''
             UPDATE OR IGNORE user
