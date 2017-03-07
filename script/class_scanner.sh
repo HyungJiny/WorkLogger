@@ -10,6 +10,6 @@ fi
 
 cd ${CWD}
 source ./bin/activate
-cd ./src/classserver
-python3 class_server.py
+cd ./src/classscanner
+python3 class_scanner.py
 

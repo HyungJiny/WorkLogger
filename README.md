@@ -14,8 +14,10 @@
 ## 목표와 버전히스토리
 
 ### 버전히스토리
+  - 1.1.3b
+    - class scanner crontab script
   - 1.1.3a
-    - 서버용 크론탭 스크립트
+    - class server crontab script
   - 1.1.3
     - MAC 주소 중복 확인
   - 1.1.2
