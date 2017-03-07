@@ -6,6 +6,7 @@ import sys # exit
 import time # group mac
 import urllib.parse # urlencode
 import urllib.request # urlopen
+import hashlib # sha256
 
 
 INIFILE = 'class_scanner.ini'
@@ -43,10 +44,14 @@ class ClassScanner(BaseScanner):
         
     # MAC 주소 다루기
     def _handle_mac(self, mac):
+        # 비식별화: 단방향 해쉬
+        hash_object = hashlib.sha256()
+        hash_object.update(mac.upper().encode('utf-8'))
+        hashed_mac = hash_object.hexdigest()
         # 시간 비교용 변수
         now_handle = int(time.time())
         # 저장 셋에 추가
-        self.log_set.add(mac.upper())
+        self.log_set.add(hashed_mac)
         # 일정 시간마다 저장
         if (now_handle - self.last_handle) < self.interval:
             return

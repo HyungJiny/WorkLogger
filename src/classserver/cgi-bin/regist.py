@@ -7,6 +7,7 @@ cgitb.enable()
 import sqlite3 # 데이터베이스 접근
 import sys # 종료
 import configparser # 설정파일 읽기
+import hashlib # 일방향 해쉬
 
 def _fail_response(user_id, user_mac):
     """등록 실패 응답
@@ -49,7 +50,10 @@ if user_id == None:
 user_mac  = form.getvalue('mac')
 if user_mac == None:
     user_mac = ' '
-user_mac = user_mac.upper()
+# 비식별화: 단방향 해쉬
+hash_object = hashlib.sha256()
+hash_object.update(user_mac.upper().encode('utf-8'))
+hashed_mac = hash_object.hexdigest()
 # 유저 아이디 확인
 if not user_id.isdigit():
     _fail_response(user_id, user_mac)
@@ -68,14 +72,14 @@ try:
             UPDATE OR IGNORE user
             SET '''
             + 'id="' + user_id + '", '
-            + 'mac="' + user_mac + '" '
+            + 'mac="' + hashed_mac + '" '
             + '''WHERE '''
             + 'id="' + user_id + '";'
             + '\n'
             + 'INSERT OR IGNORE INTO user '
             + '(id, mac) VALUES ('
             + '"' + user_id + '", '
-            + '"' + user_mac + '");')
+            + '"' + hashed_mac + '");')
     connector.commit()
     _success_response(user_id, user_mac)
 except Exception as err:
