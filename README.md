@@ -14,6 +14,8 @@
 ## 목표와 버전히스토리
 
 ### 버전히스토리
+  - 1.1.3c
+    - class scanner crontab script 수정
   - 1.1.3b
     - class scanner crontab script
   - 1.1.3a
